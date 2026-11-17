@@ -49,6 +49,11 @@ button{font-family:inherit;cursor:pointer;border:0}
 .tile.r{background:var(--good);color:#fff}
 .tile.w{background:var(--bad);color:#fff}
 .tile:disabled{pointer-events:none}
+.hero{position:fixed;inset:0;display:grid;place-items:center;z-index:8;pointer-events:none}
+.hero div{font-size:130px;text-align:center;line-height:1.1;animation:hero 1.7s ease-out forwards}
+.hero small{display:block;font-size:36px;font-weight:900;color:var(--ac);text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.em{width:auto;height:auto;font-size:30px}
+@keyframes hero{0%{transform:scale(0) rotate(-40deg);opacity:0}20%{transform:scale(1.4) rotate(12deg);opacity:1}35%{transform:scale(1) rotate(-10deg)}50%{transform:scale(1.15) rotate(10deg)}65%{transform:scale(1) rotate(-6deg)}85%{opacity:1}100%{transform:scale(1) translateY(-70px);opacity:0}}
 @keyframes bounce{50%{transform:translateY(-14px)}}
 @keyframes pulse{50%{transform:scale(1.06)}}
 @keyframes pop{from{transform:scale(.85);opacity:0}}
@@ -91,7 +96,7 @@ button{font-family:inherit;cursor:pointer;border:0}
 <script>
 const Q=[
 ["ما قيمة اللوغاريتم؟","log₇ 1",["7","1","0","غير معرّف"],2,"log_b 1 = 0 لأن 7⁰ = 1."],
-["ما قيمة العبارة؟","5^(log₅ 9)",["5","45","9","1"],2,"الخاصية b^(log_b x) = x، فالناتج 9."],
+["ما قيمة اللوغاريتم؟","log₂ (1/32)",["5","−5","⅕","−⅕"],1,"1/32 = 2⁻⁵ إذن log₂ (1/32) = −5."],
 ["ما قيمة اللوغاريتم؟","log₉ 9",["0","9","1","غير معرّف"],2,"log_b b = 1 لأن 9¹ = 9."],
 ["حلّ المعادلة الأسية، x = ؟","2ˣ = 8³",["3","6","9","24"],2,"8³ = (2³)³ = 2⁹ إذن x = 9."],
 ["الصورة اللوغاريتمية المكافئة لـ","5³ = 125",["log₅ 125 = 3","3log₅ = 125","log₅ 3 = 125","log₂ 125 = 5"],0,"الأساس 5 والأس 3 والعدد 125."],
@@ -131,11 +136,18 @@ function openQ(k){
 function pick(b){
  if(lock)return;lock=true;const ok=b.dataset.ok==='1';
  document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.ok==='1')x.classList.add('good')});
- if(ok){score+=100;res[cur]=1;sGood();confetti();$('#fbt').textContent='🎉 إجابة صحيحة! +١٠٠'}
- else{b.classList.add('bad');res[cur]=2;sBad();$('#fbt').textContent='😅 إجابة خاطئة، الصحيحة باللون الأخضر'}
+ if(ok){score+=100;res[cur]=1;sGood();confetti();cheer(1);$('#fbt').textContent='🎉 إجابة صحيحة! +١٠٠'}
+ else{b.classList.add('bad');res[cur]=2;sBad();cheer(0);$('#fbt').textContent='😅 إجابة خاطئة، الصحيحة باللون الأخضر'}
  $('#fbw').textContent=Q[order[cur]][4];$('#fb').classList.add('on');$('#h-s').textContent='⭐ '+ar(score);
  $('#next').textContent=res.every(Boolean)?'النتيجة 🏆':'الرجوع للوحة ◀';
  setTimeout(()=>$('#fb').scrollIntoView({behavior:'smooth',block:'end'}),150);
+}
+function sBoing(){if(mute||!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(700,t+.15);o.frequency.exponentialRampToValueAtTime(300,t+.35);g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.4)}
+function cheer(good){
+ const H=good?[['🥳','برافو عليك!'],['🤩','يا سلام عليك!'],['🦄','عبقرية!'],['🕺','ارقصي فرحاً!'],['😎','ولا غلطة!'],['🚀','انطلقتِ للقمة!'],['🤯','مخّك يجنن!'],['🐸','يا بطلة!']]:[['😅','حظ أوفر!']];
+ const [h,m]=H[Math.floor(Math.random()*H.length)],d=document.createElement('div'),x=document.createElement('div'),sm=document.createElement('small');
+ d.className='hero';sm.textContent=m;x.append(h,sm);d.appendChild(x);document.body.appendChild(d);setTimeout(()=>d.remove(),1800);
+ if(good){sBoing();for(let k=0;k<18;k++){const e=document.createElement('i');e.className='cf em';e.textContent=['🎉','⭐','😂','🍬','🎈'][k%5];e.style.cssText=`left:${Math.random()*100}vw;--dx:${(Math.random()-.5)*160}px;animation-delay:${Math.random()*.5}s`;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}}
 }
 function end(){
  show('s2');const right=res.filter(x=>x===1).length,r=right/N,st=r>=.85?3:r>=.6?2:r>=.3?1:0;
